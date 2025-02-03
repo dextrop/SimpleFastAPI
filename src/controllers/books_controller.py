@@ -1,4 +1,4 @@
-from models import Books
+from src.models.books import Books
 class BooksController():
     def __init__(self, db_session):
         self.db = db_session

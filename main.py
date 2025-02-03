@@ -1,13 +1,26 @@
-from typing import Dict
-
 import uvicorn
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
+from fastapi import FastAPI, Request, Depends
 
-from controller import BooksController
-from db import get_db
+from src.utils.auth import JWTAuthenticationMiddleware
+from src.utils.db import get_db, SessionLocal
+from src.views import books_route, users_route
 
 app = FastAPI()
+
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    response = await call_next(request)
+    return response
+
+# Add the JWT Authentication Middleware
+app.add_middleware(JWTAuthenticationMiddleware, dbsession=SessionLocal)
+
+app.include_router(books_route)
+app.include_router(users_route)
+
+@app.get("/heath_api")
+def get_server_heath():
+    return {"status": "Server up and running"}
 
 @app.get("/heath_api")
 def get_server_heath():
@@ -15,14 +28,6 @@ def get_server_heath():
 
 def run_server():
     uvicorn.run("main:app")
-
-@app.post("/books/")
-def add_books_api(body: Dict, db: Session = Depends(get_db)):
-    return BooksController(db).add_book(body)
-
-@app.get("/books/")
-def get_books_api(db: Session = Depends(get_db)):
-    return BooksController(db).get_all_books()
 
 if __name__ == '__main__':
     run_server()

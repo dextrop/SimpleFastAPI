@@ -1,10 +1,8 @@
 import datetime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, text
+from src.models.base import BaseModel
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 
-Base = declarative_base()
-
-class Books(Base):
+class Books(BaseModel):
     __tablename__ = "books"
 
     id = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
